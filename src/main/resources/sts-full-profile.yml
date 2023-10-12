@@ -1,0 +1,410 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: "Sri Tech Solutions"
+  description: "This microservice is regarding employee full profile"
+  contact:
+    email: "srinivashemadri2000@gmail.com"
+
+servers:
+  - url : http://localhost:8081/full-profile/employee
+
+tags:
+  - name: employeeFullProfile
+    description: all about employees
+
+paths:
+  /employee/allBench:
+    get:
+      tags:
+        - employeeFullProfile
+      summary: Get all employees on bench
+      description: lists all employees whose on bench value is true
+      operationId: getAllOnBenchAndCurrentEmployees
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeListResponseHolder'
+        '400':
+          description: Bad request
+        '404':
+          description: Path not found
+        '405':
+          description: Validation exception
+
+  /employee/del/{empId}:
+    delete:
+      tags:
+        - employeeFullProfile
+      summary: delete an employee based on empId
+      description: delete an employee and also his/her corresponding addresses and company history based on empId
+      operationId: deleteEmployeeById
+      parameters:
+        - name: empId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /employee/all:
+    get:
+      tags:
+        - employeeFullProfile
+      summary: list all the employees
+      description: this wil fetch all the employees existing from the db
+      operationId: listAllEmployees
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeListResponseHolder'
+        '400':
+          description: Bad request
+        '404':
+          description: Path not found
+        '405':
+          description: Validation exception
+  /employee/{empId}:
+    get:
+      tags:
+        - employeeFullProfile
+      summary: retreive an employee based on employee id
+      description: returns a single employee
+      operationId: getEmployeeByID
+      parameters:
+        - name: empId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponseHolder'
+        '400':
+          description: Bad request
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+  /employee/new:
+    post:
+      tags:
+        - employeeFullProfile
+      summary: Register a new employee
+      description: Register a new employee by passing employee object as request body
+      operationId: registerNewEmployee
+      requestBody:
+        required: true
+        description: employee object as request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterEmployeeRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponseHolder'
+        '400':
+          description: Bad request
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+  /employee:
+    put:
+      tags:
+        - employeeFullProfile
+      summary: update employee details
+      description: update employee details by sending employee object as request body
+      operationId: updateEmployeeDetails
+      requestBody:
+        description:  employee object as request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployeeRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeResponseHolder'
+        '400':
+          description: Bad request
+        '404':
+          description: Path not found
+        '405':
+          description: Validation exception
+  /employee/status/{empId}/{isCurrentEmployee}:
+    put:
+      tags:
+        - employeeFullProfile
+      summary: update employee details
+      description: update employee details by sending employee object as request body
+      operationId: updateEmployeeStatus
+      parameters:
+        - name: empId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: isCurrentEmployee
+          in: path
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateEmployeeStatusResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Path not found
+        '405':
+          description: Validation exception
+
+components:
+  schemas:
+    EmployeeDepartment:
+      type: string
+      enum:
+        - HR
+        - IT
+        - MANAGEMENT
+        - PAYROLL
+        - TRANSPORT
+
+    Address:
+      type: object
+      properties:
+        addressId:
+          type: integer
+          example: 1
+        addressZipCode:
+          type: number
+          format: long
+          example: 500090
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        landmark:
+          type: string
+        empId:
+          type: string
+        addressType:
+          $ref: '#/components/schemas/AddressType'
+
+    RegisterEmployeeRequest:
+      type: object
+      required:
+        - empName
+        - empEmail
+        - empPhoneNum
+        - empSalary
+        - empExperience
+        - empDOB
+        - empSkills
+        - empDesignation
+        - empAddress
+        - empDept
+      properties:
+        empName:
+          type: string
+          example: 'srinivas'
+        empEmail:
+          type: string
+          example: 'srinivas@gmail.com'
+        empPhoneNum:
+          type: number
+          example: 9849699394
+          format: long
+        empSalary:
+          type: number
+          format: double
+          example: 1200000.56
+        empExperience:
+          type: integer
+          example: 2
+        empDOB:
+          type: string
+          format: date
+          example: 2000-09-09
+        empSkills:
+          type: string
+          example: 'java'
+        empAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        empDept:
+          $ref: '#/components/schemas/EmployeeDepartment'
+    UpdateEmployeeRequest:
+      type: object
+      required:
+        - empId
+        - empName
+        - empEmail
+        - empPhoneNum
+        - empSalary
+        - empExperience
+        - empDOB
+        - empSkills
+        - empDesignation
+        - empAddress
+        - empDept
+      properties:
+        empId:
+          type: string
+          example: 'STS-1000'
+        empName:
+          type: string
+          example: 'srinivas'
+        empEmail:
+          type: string
+          example: 'srinivas@gmail.com'
+        empPhoneNum:
+          type: number
+          example: 9849699394
+          format: long
+        empSalary:
+          type: number
+          format: double
+          example: 1200000.56
+        empExperience:
+          type: integer
+          example: 2
+        empDOB:
+          type: string
+          format: date
+          example: 2000-09-09
+        empSkills:
+          type: string
+          example: 'java'
+        empAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        empDept:
+          $ref: '#/components/schemas/EmployeeDepartment'
+
+    AddressType:
+      type: string
+      enum:
+        - PERMANENT
+        - OFFICE
+        - TEMPORARY
+
+    EmployeeListResponseHolder:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+        errorMessage:
+          type: string
+        employeesData:
+          type: array
+          items:
+            $ref: '#/components/schemas/Employee'
+
+    EmployeeResponseHolder:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+        errorMessage:
+          type: string
+        employeeData:
+          $ref: '#/components/schemas/Employee'
+
+    Employee:
+      type: object
+      properties:
+        empId:
+          type: string
+          example: 'STS-1000'
+        empName:
+          type: string
+          example: 'srinivas'
+        empEmail:
+          type: string
+          example: 'srinivas@gmail.com'
+        empPhoneNum:
+          type: number
+          example: 9849699394
+          format: long
+        empSalary:
+          type: number
+          format: double
+          example: 1200000.56
+        empExperience:
+          type: integer
+          example: 2
+        empDOB:
+          type: string
+          format: date-time
+          example: 2000-09-09
+        empSkills:
+          type: string
+          example: 'java'
+        empDesignation:
+          type: string
+        isCurrentEmployee:
+          type: boolean
+        isEmployeeOnBench:
+          type: boolean
+        empAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        empDept:
+          $ref: '#/components/schemas/EmployeeDepartment'
+    UpdateEmployeeStatusResponse:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+        errorMessage:
+          type: string
+        body:
+          type: string
+    DeleteResponse:
+      type: object
+      properties:
+        hasError:
+          type: boolean
+        errorMessage:
+          type: string
+        body:
+          type: string
+    BGVStatus:
+      type: string
+      enum:
+        - IN_PROGRESS
+        - COMPLETED
+        - FAILED
